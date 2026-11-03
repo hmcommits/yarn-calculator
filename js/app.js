@@ -9,6 +9,10 @@ const clearWtBtn = document.getElementById('clear-weight');
 const lenError = document.getElementById('len-error');
 const wtError = document.getElementById('wt-error');
 
+const btnCalculate = document.getElementById('btn-calculate');
+const resultsSection = document.getElementById('results-section');
+const btnBackInputs = document.getElementById('btn-back-inputs');
+
 const valTex = document.getElementById('val-tex');
 const valEng = document.getElementById('val-eng');
 const valDenier = document.getElementById('val-denier');
@@ -113,7 +117,7 @@ function performCalculation(shouldPulse = false) {
     classDesc.textContent = 'Please enter positive values for yarn length (m) and weight (g).';
     gaugeMarker.style.left = '0%';
     currentCalculation = null;
-    return;
+    return false;
   }
 
   const result = calculateYarnCount(L, g);
@@ -138,12 +142,29 @@ function performCalculation(shouldPulse = false) {
       c.classList.add('pulse-anim');
     });
   }
+
+  return true;
+}
+
+// Calculate and reveal results with smooth scroll
+function calculateAndShowResults() {
+  const success = performCalculation(true);
+  if (success) {
+    resultsSection.classList.remove('is-hidden');
+    resultsSection.classList.add('revealed');
+    // Scroll smoothly to results section
+    setTimeout(() => {
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  } else {
+    showToast('Please enter positive length and weight');
+  }
 }
 
 // Save Current Calculation to History
 function saveCurrentToHistory() {
   if (!currentCalculation || !currentCalculation.isValid) {
-    showToast('Enter valid length and weight first');
+    showToast('Calculate counts first to save');
     return;
   }
 
@@ -176,7 +197,7 @@ function saveCurrentToHistory() {
 // Render History
 function renderHistoryList() {
   if (historyData.length === 0) {
-    historyList.innerHTML = `<div class="empty-state">No saved calculations yet. Tap "Save to History" or enter values above.</div>`;
+    historyList.innerHTML = `<div class="empty-state">No saved calculations yet. Enter values and tap "Calculate".</div>`;
     return;
   }
 
@@ -204,9 +225,8 @@ function renderHistoryList() {
       if (found) {
         inputLength.value = found.L;
         inputWeight.value = found.g;
-        performCalculation(true);
+        calculateAndShowResults();
         showToast(`Loaded ${found.L}m / ${found.g}g`);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
   });
@@ -215,8 +235,12 @@ function renderHistoryList() {
 // Copy Summary / Share
 async function shareOrCopyReport() {
   if (!currentCalculation || !currentCalculation.isValid) {
-    showToast('Please enter length and weight first');
-    return;
+    // If not calculated yet, calculate first
+    const ok = performCalculation(false);
+    if (!ok) {
+      showToast('Please calculate counts first');
+      return;
+    }
   }
 
   const p = currentPrecision;
@@ -340,45 +364,59 @@ function handleReverseCalculation() {
 
 // Event Listeners Setup
 function initEventListeners() {
-  // Real-time calculation as user types
+  // Primary Calculate Button
+  btnCalculate.addEventListener('click', calculateAndShowResults);
+
+  // Back to inputs button
+  if (btnBackInputs) {
+    btnBackInputs.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      inputLength.focus();
+    });
+  }
+
+  // Clear inputs helper
   inputLength.addEventListener('input', () => {
-    performCalculation(false);
+    if (resultsSection.classList.contains('revealed')) {
+      performCalculation(false);
+    }
   });
   inputWeight.addEventListener('input', () => {
-    performCalculation(false);
+    if (resultsSection.classList.contains('revealed')) {
+      performCalculation(false);
+    }
   });
 
   // Clear buttons
   clearLenBtn.addEventListener('click', () => {
     inputLength.value = '';
     inputLength.focus();
-    performCalculation(false);
+    clearLenBtn.classList.remove('has-value');
   });
 
   clearWtBtn.addEventListener('click', () => {
     inputWeight.value = '';
     inputWeight.focus();
-    performCalculation(false);
+    clearWtBtn.classList.remove('has-value');
   });
 
   // Quick Chips Actions (Steppers & Presets)
-  document.querySelectorAll('.chip-btn').forEach(btn => {
+  document.querySelectorAll('.chip-btn[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
       const val = parseFloat(btn.dataset.val);
       if (action === 'add-len') {
         const current = parseFloat(inputLength.value) || 0;
         inputLength.value = Math.max(0, current + val);
-        performCalculation(true);
       } else if (action === 'set-len') {
         inputLength.value = val;
-        performCalculation(true);
       } else if (action === 'add-wt') {
         const current = parseFloat(inputWeight.value) || 0;
         inputWeight.value = Number(Math.max(0, current + val).toFixed(4));
-        performCalculation(true);
       } else if (action === 'set-wt') {
         inputWeight.value = val;
+      }
+      if (resultsSection.classList.contains('revealed')) {
         performCalculation(true);
       }
     });
@@ -404,19 +442,24 @@ function initEventListeners() {
         inputLength.value = '10';
         inputWeight.value = '0.15';
       }
-      performCalculation(true);
-      showToast(`Applied preset: ${btn.querySelector('span').textContent}`);
+      calculateAndShowResults();
+      showToast(`Applied: ${btn.querySelector('span').textContent}`);
     });
   });
 
-  // Action Bar Buttons
+  // Secondary Action Buttons (Save, Share, Reset)
   btnSaveRecord.addEventListener('click', saveCurrentToHistory);
   btnShareReport.addEventListener('click', shareOrCopyReport);
   btnResetInputs.addEventListener('click', () => {
     inputLength.value = '100';
     inputWeight.value = '2.0';
-    performCalculation(true);
-    showToast('Reset to default test sample (100m / 2.0g)');
+    lenError.style.display = 'none';
+    wtError.style.display = 'none';
+    resultsSection.classList.remove('revealed');
+    resultsSection.classList.add('is-hidden');
+    currentCalculation = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('Reset to default (100m / 2.0g)');
   });
 
   // Precision selector
@@ -424,7 +467,9 @@ function initEventListeners() {
   precisionSelect.addEventListener('change', () => {
     currentPrecision = precisionSelect.value;
     localStorage.setItem('yarncalc_precision', currentPrecision);
-    performCalculation(false);
+    if (resultsSection.classList.contains('revealed')) {
+      performCalculation(false);
+    }
     handleReverseCalculation();
   });
 
@@ -525,7 +570,6 @@ function applyTheme(theme) {
 function init() {
   initEventListeners();
   renderHistoryList();
-  performCalculation(false);
 
   // Initialize PWA Lifecycle
   initPWA({
