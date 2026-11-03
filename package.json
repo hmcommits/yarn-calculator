@@ -5,6 +5,7 @@
   "description": "Progressive Web App for Yarn Count conversions (Tex, English Ne, Denier, Metric Nm)",
   "main": "index.html",
   "scripts": {
+    "build": "echo 'Static build complete'",
     "start": "node server.js",
     "serve": "node server.js",
     "test": "node test_calculator.js",
