@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Progressive Web App for Yarn Count conversions (Tex, English Ne, Denier, Metric Nm)",
-  "main": "index.html",
+  "main": "server.js",
   "scripts": {
-    "build": "echo 'Static build complete'",
+    "build": "echo 'Ready'",
     "start": "node server.js",
     "serve": "node server.js",
-    "test": "node test_calculator.js",
-    "python-serve": "python -m http.server 3000"
+    "test": "node test_calculator.js"
   },
   "keywords": [
     "pwa",
