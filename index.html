@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Professional, lightweight Textile Yarn Count Calculator and Converter for Tex, English Count (Ne), Denier, and Metric (Nm)." />
+  
+  <!-- iOS PWA meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="YarnCalc" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <!-- Favicons and Web App Manifest -->
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="alternate icon" type="image/png" href="icons/favicon-32.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <title>YarnCalc Pro • Yarn Count Converter</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Service Worker Update Notification Banner -->
+  <div id="update-notification" class="update-banner hidden" role="alert">
+    <span>A new version of YarnCalc Pro is available!</span>
+    <button id="update-reload-btn" class="btn-update">Update Now</button>
+  </div>
+
+  <main class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon-box" aria-hidden="true">
+          <svg viewBox="0 0 512 512" width="28" height="28" fill="none">
+            <rect x="24" y="24" width="464" height="464" rx="100" fill="#0f172a" stroke="#38bdf8" stroke-width="16" />
+            <line x1="110" y1="140" x2="110" y2="370" stroke="#94a3b8" stroke-width="16" stroke-linecap="round" />
+            <rect x="180" y="140" width="150" height="26" rx="13" fill="#10b981" />
+            <rect x="165" y="180" width="180" height="26" rx="13" fill="#06b6d4" />
+            <rect x="150" y="220" width="210" height="26" rx="13" fill="#38bdf8" />
+            <rect x="140" y="260" width="230" height="26" rx="13" fill="#818cf8" />
+            <rect x="130" y="300" width="250" height="26" rx="13" fill="#c084fc" />
+            <path d="M 280,310 C 370,310 380,210 440,190" stroke="#38bdf8" stroke-width="14" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>YarnCalc Pro</h1>
+          <div class="brand-tagline">
+            <span id="network-status" class="online-indicator" title="Network status: Online"></span>
+            <span id="network-text">Offline Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <button id="btn-install" class="btn-install" style="display: none;" aria-label="Install App to Home Screen">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Install</span>
+        </button>
+
+        <button id="btn-theme" class="icon-btn" aria-label="Toggle Theme" title="Switch Theme">
+          <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Calculation Card -->
+    <section class="glass-card">
+      <!-- Tabs Navigation -->
+      <div class="tabs-nav" role="tablist">
+        <button id="tab-direct" class="tab-btn active" role="tab" aria-selected="true" aria-controls="pane-direct">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="9" x2="20" y2="9"></line>
+            <line x1="4" y1="15" x2="20" y2="15"></line>
+            <line x1="10" y1="3" x2="8" y2="21"></line>
+            <line x1="16" y1="3" x2="14" y2="21"></line>
+          </svg>
+          From Length & Weight
+        </button>
+        <button id="tab-reverse" class="tab-btn" role="tab" aria-selected="false" aria-controls="pane-reverse">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Count Converter / Reverse
+        </button>
+      </div>
+
+      <!-- Tab Pane 1: Forward Calculator -->
+      <div id="pane-direct" role="tabpanel">
+        <div class="input-grid">
+          <!-- Length Input (L) -->
+          <div class="field-group">
+            <label class="field-label" for="input-length">
+              <span>Yarn Length (<span class="symbol">L</span>)</span>
+              <span id="len-error" style="color: #ef4444; font-size: 0.72rem; display: none;">Invalid</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                id="input-length" 
+                type="number" 
+                inputmode="decimal" 
+                step="any" 
+                placeholder="100.0" 
+                value="100" 
+                min="0.0001" 
+                autocomplete="off"
+                aria-label="Yarn Length in meters"
+              />
+              <button id="clear-length" class="clear-input-btn has-value" title="Clear length" aria-label="Clear length">×</button>
+              <div class="unit-badge">Meters (m)</div>
+            </div>
+            <!-- Quick Stepper Chips for Length -->
+            <div class="quick-chips-row">
+              <button class="chip-btn" data-action="add-len" data-val="10">+10m</button>
+              <button class="chip-btn" data-action="add-len" data-val="50">+50m</button>
+              <button class="chip-btn" data-action="add-len" data-val="100">+100m</button>
+              <button class="chip-btn" data-action="set-len" data-val="109.73">Lea (109.7m)</button>
+            </div>
+          </div>
+
+          <!-- Weight Input (g) -->
+          <div class="field-group">
+            <label class="field-label" for="input-weight">
+              <span>Yarn Weight (<span class="symbol">g</span>)</span>
+              <span id="wt-error" style="color: #ef4444; font-size: 0.72rem; display: none;">Invalid</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                id="input-weight" 
+                type="number" 
+                inputmode="decimal" 
+                step="any" 
+                placeholder="2.0" 
+                value="2.0" 
+                min="0.00001" 
+                autocomplete="off"
+                aria-label="Yarn Weight in grams"
+              />
+              <button id="clear-weight" class="clear-input-btn has-value" title="Clear weight" aria-label="Clear weight">×</button>
+              <div class="unit-badge">Grams (g)</div>
+            </div>
+            <!-- Quick Stepper Chips for Weight -->
+            <div class="quick-chips-row">
+              <button class="chip-btn" data-action="add-wt" data-val="0.5">+0.5g</button>
+              <button class="chip-btn" data-action="add-wt" data-val="1.0">+1.0g</button>
+              <button class="chip-btn" data-action="add-wt" data-val="5.0">+5.0g</button>
+              <button class="chip-btn" data-action="set-wt" data-val="1.97">1.97g</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Standard Textile Lab Presets -->
+        <div class="presets-container">
+          <div class="presets-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            Quick Textile Lab Test Presets
+          </div>
+          <div class="presets-scroll">
+            <button class="preset-pill" data-preset="wrap-reel">
+              <span>Wrap Reel (100 m)</span>
+              <span class="sub">L: 100m • g: 2.0g (20 Tex)</span>
+            </button>
+            <button class="preset-pill" data-preset="lea-30s">
+              <span>Cotton 30s Lea Test</span>
+              <span class="sub">L: 109.73m • g: 2.16g (30 Ne)</span>
+            </button>
+            <button class="preset-pill" data-preset="polyester-150">
+              <span>150D Polyester Filament</span>
+              <span class="sub">L: 100m • g: 1.67g (150 Den)</span>
+            </button>
+            <button class="preset-pill" data-preset="denim-10s">
+              <span>Denim Warp Yarn (10s)</span>
+              <span class="sub">L: 100m • g: 5.91g (10 Ne)</span>
+            </button>
+            <button class="preset-pill" data-preset="micro-test">
+              <span>Micro Sample (10 m)</span>
+              <span class="sub">L: 10m • g: 0.15g (15 Tex)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Primary Action Row -->
+        <div class="action-bar">
+          <button id="btn-save-record" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Save to History
+          </button>
+          <button id="btn-share-report" class="btn-secondary" title="Copy formatted report for WhatsApp or Lab Log">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Share Summary
+          </button>
+          <button id="btn-reset-inputs" class="btn-secondary" title="Reset to standard defaults">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Pane 2: Reverse Calculator / Direct Count Converter -->
+      <div id="pane-reverse" role="tabpanel" style="display: none;">
+        <div class="field-group" style="margin-bottom: 1rem;">
+          <label class="field-label">Known Yarn Count System</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <select id="rev-count-type" class="precision-select" style="padding: 0.75rem; font-size: 0.9rem;">
+              <option value="eng">English Count (Ne)</option>
+              <option value="tex">Tex</option>
+              <option value="denier">Denier (D)</option>
+              <option value="metric">Metric Count (Nm)</option>
+            </select>
+            <div class="input-wrapper">
+              <input id="rev-count-val" type="number" step="any" placeholder="30" value="30" />
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 1rem;">
+          <label class="field-label">Given Length (meters) -> Find Weight (grams)</label>
+          <div class="input-wrapper">
+            <input id="rev-length-val" type="number" step="any" placeholder="100" value="100" />
+            <div class="unit-badge">Meters</div>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 0.85rem; color: var(--text-secondary);">Calculated Weight Required:</span>
+          <span id="rev-result-wt" style="font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono); color: var(--color-brand);">-- g</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Cards Section -->
+    <section class="results-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          Calculated Counts
+        </h2>
+        
+        <div class="precision-control">
+          <span>Decimals:</span>
+          <select id="precision-select" class="precision-select" aria-label="Decimal places precision">
+            <option value="2" selected>2 (Standard)</option>
+            <option value="3">3 (Precision)</option>
+            <option value="4">4 (Micro)</option>
+            <option value="1">1</option>
+            <option value="0">0 (Integer)</option>
+            <option value="exact">Exact</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4 High Impact Count Cards -->
+      <div class="cards-grid">
+        <!-- 1. Tex Card -->
+        <article class="count-card card-tex" id="card-tex">
+          <div class="card-top">
+            <div class="card-title-group">
+              <h3>Tex</h3>
+              <span class="system-badge">Direct System</span>
+            </div>
+            <button class="copy-mini-btn" data-copy="tex" title="Copy Tex Value" aria-label="Copy Tex Value">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="count-val-row">
+              <span class="count-val" id="val-tex">20.00</span>
+              <span class="count-unit">tex</span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <span>Formula</span>
+            <span class="formula-hint">(g ÷ L) × 1000</span>
+          </div>
+        </article>
+
+        <!-- 2. English Count (Ne) Card -->
+        <article class="count-card card-eng" id="card-eng">
+          <div class="card-top">
+            <div class="card-title-group">
+              <h3>English (Ne)</h3>
+              <span class="system-badge">Indirect System</span>
+            </div>
+            <button class="copy-mini-btn" data-copy="eng" title="Copy English Count" aria-label="Copy English Count">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="count-val-row">
+              <span class="count-val" id="val-eng">29.53</span>
+              <span class="count-unit">s Ne</span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <span>Formula</span>
+            <span class="formula-hint">590.5 ÷ Tex</span>
+          </div>
+        </article>
+
+        <!-- 3. Denier Card -->
+        <article class="count-card card-denier" id="card-denier">
+          <div class="card-top">
+            <div class="card-title-group">
+              <h3>Denier</h3>
+              <span class="system-badge">Direct System</span>
+            </div>
+            <button class="copy-mini-btn" data-copy="denier" title="Copy Denier Value" aria-label="Copy Denier Value">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="count-val-row">
+              <span class="count-val" id="val-denier">180.00</span>
+              <span class="count-unit">Den</span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <span>Formula</span>
+            <span class="formula-hint">5315 ÷ eng</span>
+          </div>
+        </article>
+
+        <!-- 4. Metric Count (Nm) Card -->
+        <article class="count-card card-metric" id="card-metric">
+          <div class="card-top">
+            <div class="card-title-group">
+              <h3>Metric (Nm)</h3>
+              <span class="system-badge">Indirect System</span>
+            </div>
+            <button class="copy-mini-btn" data-copy="metric" title="Copy Metric Count" aria-label="Copy Metric Count">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="count-val-row">
+              <span class="count-val" id="val-metric">50.04</span>
+              <span class="count-unit">Nm</span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <span>Formula</span>
+            <span class="formula-hint">eng ÷ 0.59</span>
+          </div>
+        </article>
+      </div>
+
+      <!-- Yarn Classification & Scale Gauge -->
+      <div class="classification-card">
+        <div class="class-header">
+          <div class="class-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Yarn Category</span>
+          </div>
+          <span id="class-badge" class="class-badge">Medium Count</span>
+        </div>
+
+        <!-- Gauge Bar -->
+        <div class="gauge-track">
+          <div id="gauge-marker" class="gauge-marker" style="left: 55%;"></div>
+        </div>
+
+        <div class="gauge-labels">
+          <span>Microfiber</span>
+          <span>Fine Count</span>
+          <span>Medium</span>
+          <span>Heavy Denim</span>
+          <span>Carpet / Cord</span>
+        </div>
+
+        <p id="class-desc" class="class-desc">
+          Standard apparel, t-shirt jersey (20s-30s Ne), bed linen, casual knits.
+        </p>
+      </div>
+    </section>
+
+    <!-- Calculation History Section -->
+    <section class="glass-card history-container">
+      <div class="section-header" style="margin-bottom: 0.75rem;">
+        <h3 class="section-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Recent Calculations Log
+        </h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="btn-export-csv" class="chip-btn" title="Download history as CSV spreadsheet">Export CSV</button>
+          <button id="btn-clear-history" class="chip-btn" title="Clear all history">Clear</button>
+        </div>
+      </div>
+
+      <div id="history-list" class="history-list">
+        <div class="empty-state">No saved calculations yet. Tap "Save to History" or enter values above.</div>
+      </div>
+    </section>
+
+    <!-- Formula Reference Accordion -->
+    <section class="accordion" id="formula-accordion">
+      <button class="accordion-header" id="accordion-toggle" aria-expanded="false">
+        <span style="display: flex; align-items: center; gap: 0.5rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          Textile Formula & Count Systems Guide
+        </span>
+        <svg class="accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition: transform 0.2s ease;">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="accordion-body">
+        <p>This calculator converts yarn dimensions using the classic textile formulas:</p>
+        <table class="formula-table">
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>Type</th>
+              <th>Formula</th>
+              <th>Standard Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tex</strong></td>
+              <td>Direct</td>
+              <td><code>(g ÷ L) × 1000</code></td>
+              <td>g per 1,000 meters</td>
+            </tr>
+            <tr>
+              <td><strong>English (Ne)</strong></td>
+              <td>Indirect</td>
+              <td><code>590.5 ÷ Tex</code></td>
+              <td>840-yd hanks per lb</td>
+            </tr>
+            <tr>
+              <td><strong>Denier (D)</strong></td>
+              <td>Direct</td>
+              <td><code>5315 ÷ eng</code></td>
+              <td>g per 9,000 meters</td>
+            </tr>
+            <tr>
+              <td><strong>Metric (Nm)</strong></td>
+              <td>Indirect</td>
+              <td><code>eng ÷ 0.59</code></td>
+              <td>Meters per 1 gram</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 0.85rem; font-size: 0.76rem; color: var(--text-muted); line-height: 1.5;">
+          <strong>Direct Systems (Tex, Denier):</strong> Fixed length, variable mass. The heavier/thicker the yarn, the <em>higher</em> the number.<br/>
+          <strong>Indirect Systems (English Ne, Metric Nm):</strong> Fixed mass, variable length. The finer/thinner the yarn, the <em>higher</em> the number.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- iOS PWA Install Instructions Modal -->
+  <div id="ios-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="ios-title">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 id="ios-title" style="font-size: 1.1rem; font-weight: 700;">Install YarnCalc Pro on iOS</h3>
+        <button id="ios-modal-close" class="icon-btn" style="width: 32px; height: 32px;" aria-label="Close modal">×</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Install this web app to your iPhone or iPad home screen for instant offline access and full-screen experience:
+      </p>
+      <ol style="font-size: 0.85rem; color: var(--text-primary); padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <li>Tap the <strong>Share</strong> icon <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> at the bottom of Safari.</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+        <li>Tap <strong>"Add"</strong> in the top right corner.</li>
+      </ol>
+      <button id="ios-got-it" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <svg id="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toast-msg">Copied to clipboard!</span>
+  </div>
+
+  <!-- Application Logic Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

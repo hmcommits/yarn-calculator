@@ -1,0 +1,46 @@
+{
+  "name": "YarnCalc Pro - Yarn Count Converter",
+  "short_name": "YarnCalc",
+  "description": "Professional Textile Yarn Count Converter for Tex, English Count (Ne), Denier, and Metric Count (Nm)",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090d16",
+  "theme_color": "#0f172a",
+  "categories": ["utilities", "productivity", "business"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Calculator",
+      "short_name": "Calculate",
+      "url": "./index.html#calc",
+      "description": "Calculate Yarn Count from Length and Weight"
+    },
+    {
+      "name": "Count History",
+      "short_name": "History",
+      "url": "./index.html#history",
+      "description": "View previous yarn test records"
+    }
+  ]
+}
